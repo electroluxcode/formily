@@ -2,6 +2,7 @@ import { isFn, each, isPlainObj, isArr, toArr, FormPath } from '@formily/shared'
 import { isObservable, untracked } from '@formily/reactive'
 import { Schema } from './schema'
 import { ISchema } from './types'
+import { registerMergeRules } from '@formily/validator'
 
 const REVA_ACTIONS_KEY = Symbol.for('__REVA_ACTIONS')
 
@@ -36,6 +37,7 @@ export const SchemaStateMap = {
   'x-display': 'display',
   'x-pattern': 'pattern',
   'x-validator': 'validator',
+  'x-validator-merge': 'validatorMerge',
   'x-decorator': 'decoratorType',
   'x-component': 'componentType',
   'x-decorator-props': 'decoratorProps',
@@ -100,6 +102,9 @@ export const traverseSchema = (
   schema: ISchema,
   visitor: (value: any, path: any[], omitCompile?: boolean) => void
 ) => {
+  if (schema['x-validator-merge'] !== undefined) {
+    registerMergeRules(schema['x-validator-merge'])
+  }
   if (schema['x-validator'] !== undefined) {
     visitor(
       schema['x-validator'],

@@ -111,4 +111,5 @@ export interface IValidatorOptions<Context = any> {
   validateFirst?: boolean
   triggerType?: ValidatorTriggerType
   context?: Context
+  validatorMerge?: Record<string, Validator>
 }

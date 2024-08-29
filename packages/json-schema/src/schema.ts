@@ -151,6 +151,8 @@ export class Schema<
   ['x-display']?: Display;
   //校验器
   ['x-validator']?: Validator;
+  //覆盖校验器，可以合并 全局校验 和 简写校验
+  ['x-validator-merge']?: Record<string, Validator>;
   //装饰器
   ['x-decorator']?: Decorator;
   //装饰器属性

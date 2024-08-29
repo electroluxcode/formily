@@ -110,7 +110,9 @@ export const patchCompile = (
 }
 
 export const patchSchemaCompile = (
-  targetState: IGeneralFieldState,
+  targetState: IGeneralFieldState & {
+    schema: ISchema
+  },
   sourceSchema: ISchema,
   scope: any,
   demand = false
@@ -131,4 +133,5 @@ export const patchSchemaCompile = (
       patchStateFormSchema(targetState, path, compiled)
     }
   })
+  targetState['schema'] = sourceSchema
 }

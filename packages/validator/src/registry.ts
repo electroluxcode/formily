@@ -38,7 +38,14 @@ const registry = {
     language: getBrowserlanguage(),
   },
   formats: {},
-  rules: {},
+  rules: {
+    // 全局校验规则
+    global: {},
+    // 简写校验规则
+    easy: {},
+    // 自定义校验规则
+    merge: {},
+  },
   template: null,
 }
 
@@ -88,21 +95,60 @@ export const getValidateMessageTemplateEngine = () => registry.template
 export const getValidateFormats = (key?: string) =>
   key ? registry.formats[key] : registry.formats
 
+/**
+ * @description 覆盖规则
+ * 全局规则 < 简写规则 < 用户自定义规则
+ * @param key
+ * @returns
+ */
 export const getValidateRules = <T>(
   key?: T
 ): T extends string
   ? ValidatorFunction
-  : { [key: string]: ValidatorFunction } =>
-  key ? registry.rules[key as any] : registry.rules
+  : { [key: string]: ValidatorFunction } => {
+  let rules = {
+    ...registry.rules['global'],
+    ...registry.rules['easy'],
+    ...registry.rules['merge'],
+  }
+  return key ? rules[key as any] : rules
+}
 
 export const registerValidateLocale = (locale: IRegistryLocales) => {
   registry.locales.messages = deepmerge(registry.locales.messages, locale)
 }
 
+/**
+ * @description 全局规则
+ * @param rules
+ */
 export const registerValidateRules = (rules: IRegistryRules) => {
   each(rules, (rule, key) => {
     if (isFn(rule)) {
-      registry.rules[key] = rule
+      registry.rules['global'][key] = rule
+    }
+  })
+}
+/**
+ * @description 简写规则
+ * @param rules
+ */
+export const registerEasyRules = (rules: IRegistryRules) => {
+  each(rules, (rule, key) => {
+    if (isFn(rule)) {
+      registry.rules['easy'][key] = rule
+    }
+  })
+}
+
+/**
+ * @description 自定义规则
+ * @param rules
+ */
+export const registerMergeRules = (rules: IRegistryRules) => {
+  each(rules, (rule, key) => {
+    if (isFn(rule)) {
+      registry.rules['merge'][key] = rule
     }
   })
 }

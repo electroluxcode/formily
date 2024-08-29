@@ -6,6 +6,7 @@ import {
   isArr,
 } from '@formily/shared'
 import {
+  Validator,
   ValidatorTriggerType,
   parseValidatorDescriptions,
 } from '@formily/validator'
@@ -78,6 +79,7 @@ export class Field<
   feedbacks: IFieldFeedback[]
   caches: IFieldCaches = {}
   requests: IFieldRequests = {}
+  validatorMerge: Record<string, Validator>
   constructor(
     address: FormPathPattern,
     props: IFieldProps<Decorator, Component, TextType, ValueType>,
