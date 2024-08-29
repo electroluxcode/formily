@@ -4,12 +4,22 @@ import {
   registerValidateFormats,
   setValidateLanguage,
   registerValidateMessageTemplateEngine,
+  registerMergeRules,
 } from '../index'
 
 registerValidateRules({
   custom: (value) => (value === '123' ? 'custom error' : ''),
   customBool: () => false,
   customBool2: () => true,
+  customBool3: (value) => {
+    return value === 'registerValidateRules'
+  },
+})
+
+registerMergeRules({
+  customBool3: (value) => {
+    return value === 'registerMergeRules'
+  },
 })
 
 registerValidateFormats({
@@ -529,5 +539,41 @@ test('validator order with format', async () => {
       },
     ]),
     'The field value is required'
+  )
+})
+
+test('validator merge', async () => {
+  registerMergeRules({
+    customBool3: (value) => {
+      return value === 'registerMergeRules'
+    },
+  })
+  noError(
+    await validate('registerMergeRules', {
+      customBool3: true,
+      message: 'custom error',
+    })
+  )
+})
+
+/**
+ * @description other test case should be before this one, because it will change the default rules
+ */
+test('validator merge required', async () => {
+  registerMergeRules({})
+  hasError(
+    await validate('', [{ required: true }]),
+    'The field value is required'
+  )
+
+  registerMergeRules({
+    required: () => {
+      return true
+    },
+  })
+  noError(
+    await validate('', {
+      required: true,
+    })
   )
 })
