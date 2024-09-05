@@ -1,4 +1,5 @@
-import { isArr, isBool, isFn, isStr } from '@formily/shared'
+import { isArr, isBool, isFn, isStr, isFalse } from '@formily/shared'
+import { shallowCompile } from '@formily/json-schema'
 import {
   ValidatorDescription,
   ValidatorFunction,
@@ -12,6 +13,14 @@ import { getValidateRules, getValidateLocale } from './registry'
 import { render } from './template'
 
 const getRuleMessage = (rule: IValidatorRules, type: string) => {
+  if (isFn(rule.message)) {
+    return rule.message
+  }
+  // message 支持字符串形式的函数
+  if (isStr(rule.message)) {
+    let message = rule.message ? shallowCompile(rule.message) : rule.message
+    return message
+  }
   if (rule.format) {
     return rule.message || getValidateLocale(rule.format)
   }
@@ -42,18 +51,23 @@ export const parseValidatorDescriptions = <Context = any>(
     return parseValidatorDescription(description)
   })
 }
+let shouldJuadgeBoolKey = ['whitespace', 'uniqueItems']
 
 export const parseValidatorRules = (
   rules: IValidatorRules = {}
 ): ValidatorParsedFunction[] => {
   const getRulesKeys = (): string[] => {
     const keys = []
-    if ('required' in rules) {
+    if ('required' in rules && !isFalse(rules.required)) {
       keys.push('required')
     }
     for (let key in rules) {
       if (key === 'required' || key === 'validator') continue
-      keys.push(key)
+      if (shouldJuadgeBoolKey.includes(key) && !isFalse(key)) {
+        keys.push(key)
+      } else {
+        keys.push(key)
+      }
     }
     if ('validator' in rules) {
       keys.push('validator')
@@ -68,8 +82,11 @@ export const parseValidatorRules = (
     }
   }
   const createValidate =
-    (callback: ValidatorFunction, message: string) =>
+    (callback: ValidatorFunction, message: string | Function) =>
     async (value: any, context: any) => {
+      if (isFn(message)) {
+        message = message(value, context) as string
+      }
       const context_ = getContext(context, value)
       try {
         const results = await callback(

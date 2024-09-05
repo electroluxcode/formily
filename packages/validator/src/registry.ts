@@ -15,6 +15,7 @@ import {
   IRegistryLocales,
   IRegistryRules,
 } from './types'
+import { shallowCompile } from '@formily/json-schema'
 
 const getIn = FormPath.getIn
 
@@ -101,6 +102,7 @@ export const registerValidateLocale = (locale: IRegistryLocales) => {
 
 export const registerValidateRules = (rules: IRegistryRules) => {
   each(rules, (rule, key) => {
+    rule = shallowCompile(rule)
     if (isFn(rule)) {
       registry.rules[key] = rule
     }
