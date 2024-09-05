@@ -2,6 +2,7 @@ import { isFn, each, isPlainObj, isArr, toArr, FormPath } from '@formily/shared'
 import { isObservable, untracked } from '@formily/reactive'
 import { Schema } from './schema'
 import { ISchema } from './types'
+import { registerValidateRules } from '@formily/validator'
 
 const REVA_ACTIONS_KEY = Symbol.for('__REVA_ACTIONS')
 
@@ -106,6 +107,7 @@ export const traverseSchema = (
       ['x-validator'],
       schema['x-compile-omitted']?.includes('x-validator')
     )
+    registerValidateRules(schema['x-validator'])
   }
   const seenObjects = []
   const root = schema
