@@ -1,8 +1,16 @@
-import { isFn, each, isPlainObj, isArr, toArr, FormPath } from '@formily/shared'
+import {
+  isFn,
+  each,
+  isPlainObj,
+  isArr,
+  toArr,
+  FormPath,
+  isObj,
+} from '@formily/shared'
 import { isObservable, untracked } from '@formily/reactive'
 import { Schema } from './schema'
 import { ISchema } from './types'
-import { registerValidateRules } from '@formily/validator'
+import { registerMergeRules } from '@formily/validator'
 
 const REVA_ACTIONS_KEY = Symbol.for('__REVA_ACTIONS')
 
@@ -107,7 +115,11 @@ export const traverseSchema = (
       ['x-validator'],
       schema['x-compile-omitted']?.includes('x-validator')
     )
-    registerValidateRules(schema['x-validator'])
+    //  避免 Array 类型的 x-validator 被注册
+    //  多key校验规则才注册到rules中，否则不注册
+    if (isObj(schema['x-validator']) && !schema['x-validator']['message']) {
+      registerMergeRules(schema['x-validator'] as Record<string, any>)
+    }
   }
   const seenObjects = []
   const root = schema

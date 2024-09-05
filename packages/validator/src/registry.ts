@@ -39,7 +39,10 @@ const registry = {
     language: getBrowserlanguage(),
   },
   formats: {},
-  rules: {},
+  rules: {
+    global: {},
+    merge: {},
+  },
   template: null,
 }
 
@@ -93,8 +96,13 @@ export const getValidateRules = <T>(
   key?: T
 ): T extends string
   ? ValidatorFunction
-  : { [key: string]: ValidatorFunction } =>
-  key ? registry.rules[key as any] : registry.rules
+  : { [key: string]: ValidatorFunction } => {
+  let rules = {
+    ...registry.rules['global'],
+    ...registry.rules['merge'],
+  }
+  return key ? rules[key as any] : rules
+}
 
 export const registerValidateLocale = (locale: IRegistryLocales) => {
   registry.locales.messages = deepmerge(registry.locales.messages, locale)
@@ -104,7 +112,16 @@ export const registerValidateRules = (rules: IRegistryRules) => {
   each(rules, (rule, key) => {
     rule = shallowCompile(rule)
     if (isFn(rule)) {
-      registry.rules[key] = rule
+      registry.rules.global[key] = rule
+    }
+  })
+}
+
+export const registerMergeRules = (rules: IRegistryRules) => {
+  each(rules, (rule, key) => {
+    rule = shallowCompile(rule)
+    if (isFn(rule)) {
+      registry.rules.merge[key] = rule
     }
   })
 }

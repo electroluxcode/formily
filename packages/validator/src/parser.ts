@@ -51,7 +51,6 @@ export const parseValidatorDescriptions = <Context = any>(
     return parseValidatorDescription(description)
   })
 }
-let shouldJuadgeBoolKey = ['whitespace', 'uniqueItems']
 
 export const parseValidatorRules = (
   rules: IValidatorRules = {}
@@ -63,9 +62,7 @@ export const parseValidatorRules = (
     }
     for (let key in rules) {
       if (key === 'required' || key === 'validator') continue
-      if (shouldJuadgeBoolKey.includes(key) && !isFalse(key)) {
-        keys.push(key)
-      } else {
+      if (!isFalse(rules[key])) {
         keys.push(key)
       }
     }
